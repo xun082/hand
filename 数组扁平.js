@@ -3,7 +3,7 @@ const myFlat = (arr = [], deep = 1) => {
   let result = [];
 
   arr.forEach((item) => {
-    // 如歌遍历的结果还是数组且深度大于0
+    // 如果遍历的结果还是数组且深度大于0
     if (Array.isArray(item) && deep > 0) {
       result = [...result, ...myFlat(item, deep - 1)];
     } else {
