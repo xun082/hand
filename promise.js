@@ -26,7 +26,7 @@ class MyPromise {
 
     const resolve = (value) => {
       if (this.status === PROMISE_STATUS_PENDING) {
-        // 微任务完成之后之后再执行该函数,比settimeout叼一点
+        // 微任务,跟promise.then同级,比settimeout叼一点
         queueMicrotask(() => {
           if (this.status !== PROMISE_STATUS_PENDING) return;
 
