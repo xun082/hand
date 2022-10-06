@@ -141,6 +141,28 @@ class MyPromise {
       });
     });
   }
+
+  static allSettled(promises) {
+    return new MyPromise((resolve) => {
+      const result = [];
+      promises.forEach((promise) => {
+        promise.then(
+          (res) => {
+            result.push({ status: PROMISE_STATUS_FULFILLED, value: res });
+            if (result.length === promises.length) {
+              resolve(result);
+            }
+          },
+          (error) => {
+            result.push({ status: PROMISE_STATUS_REJECTED, value: error });
+            if (result.length === promises.length) {
+              resolve(result);
+            }
+          }
+        );
+      });
+    });
+  }
 }
 
 // const promise = new MyPromise((resolve, reject) => {
@@ -160,7 +182,7 @@ const p1 = new Promise((resolve, reject) => {
 
 const p2 = new Promise((resolve, reject) => {
   setTimeout(() => {
-    resolve(2222);
+    reject(2222);
   }, 2000);
 });
 
@@ -171,6 +193,14 @@ const p3 = new Promise((resolve, reject) => {
 });
 
 MyPromise.all([p1, p2, p3])
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+
+MyPromise.allSettled([p1, p2, p3])
   .then((res) => {
     console.log(res);
   })
