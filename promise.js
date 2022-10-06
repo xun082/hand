@@ -163,6 +163,36 @@ class MyPromise {
       });
     });
   }
+
+  static race(promises) {
+    return new MyPromise((resolve, reject) => {
+      promises.forEach((promise) => {
+        // promise.then(
+        //   (res) => {
+        //     resolve(res);
+        //   },
+        //   (error) => {
+        //     reject(error);
+        //   }
+        // );
+        promise.then(resolve, reject);
+      });
+    });
+  }
+
+  static any(promises) {
+    return new MyPromise((resolve, reject) => {
+      const reasons = [];
+      promises.forEach((promise) => {
+        promise.then(resolve, (error) => {
+          reasons.push(error);
+          if (reasons.length === promises.length) {
+            reject(reasons);
+          }
+        });
+      });
+    });
+  }
 }
 
 // const promise = new MyPromise((resolve, reject) => {
@@ -194,10 +224,10 @@ const p3 = new Promise((resolve, reject) => {
 
 MyPromise.all([p1, p2, p3])
   .then((res) => {
-    console.log(res);
+    console.log(res, "all");
   })
   .catch((error) => {
-    console.log(error);
+    console.log(error, "all");
   });
 
 MyPromise.allSettled([p1, p2, p3])
@@ -206,6 +236,22 @@ MyPromise.allSettled([p1, p2, p3])
   })
   .catch((error) => {
     console.log(error);
+  });
+
+MyPromise.race([p1, p2, p3])
+  .then((res) => {
+    console.log(res, "race");
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+
+MyPromise.any([p1, p2, p3])
+  .then((res) => {
+    console.log(res, "any");
+  })
+  .catch((error) => {
+    console.log(error, "any");
   });
 
 // promise
