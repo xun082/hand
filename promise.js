@@ -67,55 +67,132 @@ class MyPromise {
   // then
   then(onFulfilled, onRejected) {
     //   当onRejected为undivided时,用catch捕捉错误
-    onRejected =
-      onRejected ||
-      ((err) => {
-        throw err;
-      });
+    const defaultOnRejected = (error) => {
+      throw error;
+    };
+    onRejected = onRejected || defaultOnRejected;
+
+    const defaultOnFulfilled = (value) => {
+      return value;
+    };
+    onFulfilled = onFulfilled || defaultOnFulfilled;
 
     // 返回新的promise,支持链式调用
     return new MyPromise((resolve, reject) => {
-      if (this.status === PROMISE_STATUS_FULFILLED && onFulfilled) {
+      if (this.status === PROMISE_STATUS_FULFILLED) {
         handle(onFulfilled, this.value, resolve, reject);
       }
 
-      if (this.status === PROMISE_STATUS_REJECTED && onRejected) {
+      if (this.status === PROMISE_STATUS_REJECTED) {
         handle(onRejected, this.reason, resolve, reject);
       }
 
       //   将成功的回调和失败的回调放到数组中
       if (this.status === PROMISE_STATUS_PENDING) {
-        onFulfilled &&
-          this.onFulfilledCallbacks.push(() => {
-            handle(onFulfilled, this.value, resolve, reject);
-          });
+        this.onFulfilledCallbacks.push(() => {
+          handle(onFulfilled, this.value, resolve, reject);
+        });
 
-        onRejected &&
-          this.onRejectedCallbacks.push(() => {
-            handle(onRejected, this.reason, resolve, reject);
-          });
+        this.onRejectedCallbacks.push(() => {
+          handle(onRejected, this.reason, resolve, reject);
+        });
       }
     });
   }
 
   catch(onRejected) {
-    this.then(undefined, onRejected);
+    return this.then(undefined, onRejected);
+  }
+
+  finally(onFinally) {
+    this.then(
+      () => {
+        onFinally();
+      },
+      () => {
+        onFinally();
+      }
+    );
+  }
+
+  static resolve(value) {
+    return new MyPromise((resolve) => resolve(value));
+  }
+
+  static reject(reason) {
+    return new MyPromise((resolve, reject) => reject(reason));
+  }
+
+  static all(promises) {
+    return new MyPromise((resolve, reject) => {
+      const values = [];
+      promises.forEach((promise) => {
+        promise.then(
+          (res) => {
+            values.push(res);
+            if (values.length === promises.length) {
+              resolve(values);
+            }
+          },
+          (error) => {
+            reject(error);
+          }
+        );
+      });
+    });
   }
 }
 
-const promise = new MyPromise((resolve, reject) => {
-  //   resolve(111);
-  reject(2222);
+// const promise = new MyPromise((resolve, reject) => {
+//   //   resolve(111);
+//   //   resolve(2222) ;
+// });
+
+// MyPromise.resolve("ssss").then((res) => {
+//   console.log(res, "11111");
+// });
+
+const p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(1111);
+  }, 1000);
 });
 
-promise.then(
-  (res) => {
+const p2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(2222);
+  }, 2000);
+});
+
+const p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(3333);
+  }, 3000);
+});
+
+MyPromise.all([p1, p2, p3])
+  .then((res) => {
     console.log(res);
-  },
-  (err) => {
-    console.log(err);
-  }
-);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+
+// promise
+//   .then((res) => {
+//     console.log(res);
+//     return "bbbb";
+//   })
+//   .then((res) => {
+//     console.log(res);
+//     throw "hahsahas";
+//   })
+//   .catch((res) => {
+//     console.log(res);
+//   })
+//   .finally(() => {
+//     console.log("success");
+//   });
 //   .catch((reason) => {
 //     console.log(reason);
 //   });
