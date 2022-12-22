@@ -18,5 +18,6 @@ Array.prototype._forEach = function (callback, thisArg) {
 [1, 2, 3]._forEach((item, index) => {
   console.log(item);
   console.log(index);
+
   console.log("------");
 });
