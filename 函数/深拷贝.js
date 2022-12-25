@@ -37,7 +37,6 @@
 
 function deepCopy(target, map = new WeakMap()) {
   // 判断是否为null或者undefined
-  // null==undefined
   if (typeof target == null) return target;
 
   // 判断是否为日期
@@ -59,13 +58,19 @@ function deepCopy(target, map = new WeakMap()) {
 
     // 没有 - 将当前对象作为key，克隆对象作为value进行存储
     const keys = isArray ? undefined : Object.keys(target);
-
     map.set(data, target);
 
-    forEach(keys || target, (value, key) => {
-      if (keys) {
-        key = value;
+    function forEach(array, iteratee) {
+      let index = -1;
+      const length = array.length;
+      while (++index < length) {
+        iteratee(array[index], index);
       }
+      return array;
+    }
+
+    forEach(keys || target, (value, key) => {
+      if (keys) key = value;
 
       data[key] = deepCopy(target[key], map);
     });
@@ -75,19 +80,10 @@ function deepCopy(target, map = new WeakMap()) {
   }
 }
 
-// while循环的性能高 使用while来实现一个通用的forEach遍历，iteratee是遍历的回掉函数，他可以接收每次遍历的value和index两个参数：
-function forEach(array, iteratee) {
-  let index = -1;
-  const length = array.length;
-  while (++index < length) {
-    iteratee(array[index], index);
-  }
-  return array;
-}
-
 const test = {
   name: "xun",
   foo: function () {
+    z;
     console.log(1111);
   },
   field2: undefined,
